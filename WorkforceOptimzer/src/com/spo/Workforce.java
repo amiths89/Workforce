@@ -41,7 +41,21 @@ public class Workforce {
 			Contractor con = new Contractor(intRooms, seniors, juniors);
 			
 			double limit = calculateWorkforceLimit(con);			
-			optimizeWorkforce(con, limit);
+			int[][] output = optimizeWorkforce(con, limit);
+			// creating JSONObject 
+			StringBuilder str = new StringBuilder(); 
+			str.append("[");
+			for(int i=0;i<output.length;i++) {
+	        	int idx = getIndexInSortedArray(backupdata,backupdata.length,i);
+	        	//System.out.println("senior: "+output[idx][0]+" junior:"+output[idx][1]);
+	        	str.append("{senior: "+ output[idx][0]+",");
+	        	str.append("junior: "+ output[idx][1]+"}");
+	        	if(i<(output.length-1))
+	        		str.append(",");
+	        	
+			}
+			str.append("]");
+			System.out.println(str.toString());
 			
 
 		} catch (ParseException ne) {
@@ -126,7 +140,9 @@ public class Workforce {
 					optimized = RequiredEffortsForStructure(sen_worker.get(i), jun_worker.get(i), swr, jwr);
 				}
 			}
-			System.out.println("Senior " + sen_worker.get(i) + " Junior " + jun_worker.get(i));
+			output[i][0] = sen_worker.get(i);
+			output[i][1] = jun_worker.get(i);
+			System.out.println("Senior " + output[i][0] + " Junior " + output[i][1]);
 			seniors = seniors - sen_worker.get(i);
 			juniors = juniors - jun_worker.get(i);
 			// System.out.println("Available Senior "+seniors+" Available Junior "+juniors);
@@ -139,6 +155,21 @@ public class Workforce {
 	public static int RequiredEffortsForStructure(int sen_worker, int jun_worker, int swr, int jwr) {
 		int optimized = sen_worker * swr + jun_worker * jwr;
 		return optimized;
+	}
+	
+	/*
+	 * Count of elements smaller than current element plus the equal element
+	 * occurring before given index
+	 */
+	public static int getIndexInSortedArray(int arr[], int n, int idx) {
+		int result = 0;
+		for (int i = 0; i < n; i++) {
+			if (arr[i] < arr[idx])
+				result++;
+			if (arr[i] == arr[idx] && i < idx)
+				result++;
+		}
+		return result;
 	}
 
 
