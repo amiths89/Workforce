@@ -31,7 +31,7 @@ public class Workforce {
 			JSONArray rooms = (JSONArray) json.get("rooms");
 			Object[] objRooms = rooms.toArray();
 			int[] intRooms = new int[objRooms.length];
-			int[] backupdata = new int[objRooms.length];
+			int[] backupdata = new int[objRooms.length]; //Unsorted Array
 			for (int i = 0; i < objRooms.length; i++) {
 				intRooms[i] = ((Long) objRooms[i]).intValue();
 				backupdata[i] = ((Long) objRooms[i]).intValue();
@@ -43,17 +43,18 @@ public class Workforce {
 			int juniors = Integer.parseInt(junior);
 			Contractor con = new Contractor(intRooms, seniors, juniors);
 
+			//Validates the input data
 			String error = validateInput(con);
 			if (error == "") {
 
-				double limit = calculateWorkforceLimit(con);
-				int[][] output = optimizeWorkforce(con, limit);
+				double limit = calculateWorkforceLimit(con);//Calculates the team size limit
+				int[][] output = optimizeWorkforce(con, limit); //Optimizes the the team capacity
+
 				// creating JSONObject
 				StringBuilder str = new StringBuilder();
 				str.append("[");
 				for (int i = 0; i < output.length; i++) {
 					int idx = getIndexInSortedArray(backupdata, backupdata.length, i);
-					// System.out.println("senior: "+output[idx][0]+" junior:"+output[idx][1]);
 					str.append("{senior: " + output[idx][0] + ",");
 					str.append("junior: " + output[idx][1] + "}");
 					if (i < (output.length - 1))
@@ -94,6 +95,9 @@ public class Workforce {
 		return limit;
 	}
 
+	/*
+	 * Logic for optimizing the available capacity
+	 */
 	public static int[][] optimizeWorkforce(Contractor con, double limit) {
 
 		int[] rooms = con.getRooms();
@@ -115,6 +119,7 @@ public class Workforce {
 		Arrays.sort(rooms);
 		int i = rooms.length - 1;
 
+		//Looping through the structures
 		while (i >= 0) {
 			System.out.println("Iteration " + (i) + ": " + rooms[i]);
 			int optimized = RequiredEffortsForStructure(sen_worker.get(i), jun_worker.get(i), swr, jwr);
@@ -149,18 +154,19 @@ public class Workforce {
 					optimized = RequiredEffortsForStructure(sen_worker.get(i), jun_worker.get(i), swr, jwr);
 				}
 			}
-			output[i][0] = sen_worker.get(i);
-			output[i][1] = jun_worker.get(i);
+			output[i][0] = sen_worker.get(i);//Storing the seniors optimized value
+			output[i][1] = jun_worker.get(i);//Storing the juniors optimized value
 			System.out.println("Senior " + output[i][0] + " Junior " + output[i][1]);
 			seniors = seniors - sen_worker.get(i);
 			juniors = juniors - jun_worker.get(i);
-			// System.out.println("Available Senior "+seniors+" Available Junior "+juniors);
 			i--;
 		}
 		return output;
 
 	}
-
+	/*
+	 * Efforts Estimation logic
+	 */
 	public static int RequiredEffortsForStructure(int sen_worker, int jun_worker, int swr, int jwr) {
 		int optimized = sen_worker * swr + jun_worker * jwr;
 		return optimized;
