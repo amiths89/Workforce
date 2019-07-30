@@ -14,6 +14,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Workforce {
+	public static String errormsg1 = "Number of structures cannot exceed 100";
+	public static String errormsg2 = "Number of rooms cannot exceed 100";
+	public static String errormsg3 = "Number of Seniors should be more than Juniors as they can handle more capacity";
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -39,24 +42,30 @@ public class Workforce {
 			int seniors = Integer.parseInt(senior);
 			int juniors = Integer.parseInt(junior);
 			Contractor con = new Contractor(intRooms, seniors, juniors);
-			
-			double limit = calculateWorkforceLimit(con);			
-			int[][] output = optimizeWorkforce(con, limit);
-			// creating JSONObject 
-			StringBuilder str = new StringBuilder(); 
-			str.append("[");
-			for(int i=0;i<output.length;i++) {
-	        	int idx = getIndexInSortedArray(backupdata,backupdata.length,i);
-	        	//System.out.println("senior: "+output[idx][0]+" junior:"+output[idx][1]);
-	        	str.append("{senior: "+ output[idx][0]+",");
-	        	str.append("junior: "+ output[idx][1]+"}");
-	        	if(i<(output.length-1))
-	        		str.append(",");
-	        	
+
+			String error = validateInput(con);
+			if (error == "") {
+
+				double limit = calculateWorkforceLimit(con);
+				int[][] output = optimizeWorkforce(con, limit);
+				// creating JSONObject
+				StringBuilder str = new StringBuilder();
+				str.append("[");
+				for (int i = 0; i < output.length; i++) {
+					int idx = getIndexInSortedArray(backupdata, backupdata.length, i);
+					// System.out.println("senior: "+output[idx][0]+" junior:"+output[idx][1]);
+					str.append("{senior: " + output[idx][0] + ",");
+					str.append("junior: " + output[idx][1] + "}");
+					if (i < (output.length - 1))
+						str.append(",");
+
+				}
+				str.append("]");
+				System.out.println(str.toString());
 			}
-			str.append("]");
-			System.out.println(str.toString());
-			
+			else {
+				System.out.println(error);
+			}
 
 		} catch (ParseException ne) {
 			System.out.println("Invalid format");
@@ -156,7 +165,7 @@ public class Workforce {
 		int optimized = sen_worker * swr + jun_worker * jwr;
 		return optimized;
 	}
-	
+
 	/*
 	 * Count of elements smaller than current element plus the equal element
 	 * occurring before given index
@@ -172,5 +181,23 @@ public class Workforce {
 		return result;
 	}
 
+	public static String validateInput(Contractor con) {
+		String Error = "";
+		int[] rooms = con.getRooms();
+		int seniors = con.getSeniors();
+		int juniors = con.getJuniors();
+		if (rooms.length > 100) {
+			Error = "" + errormsg1 + "\n";
+		}
+		for (int i = 0; i < rooms.length; i++) {
+			if (rooms[i] > 100) {
+				Error = Error + errormsg2 + "\n";
+			}
+		}
+		if (juniors > seniors) {
+			Error = Error + errormsg3 + "\n";
+		}
+		return Error;
+	}
 
 }
